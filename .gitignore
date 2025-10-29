@@ -1,0 +1,30 @@
+# Entornos virtuales
+venv/
+.env
+
+# Cache de Python
+__pycache__/
+*.pyc
+
+# Archivos temporales
+*.log
+*.sqlite3
+.DS_Store
+
+# Configuración del editor (opcional)
+.vscode/
+
+# Alembic
+alembic/__pycache__/
+alembic/versions/__pycache__/
+alembic/versions/*.pyc
+
+# Archivos temporales de Uvicorn / pytest
+*.pid
+*.coverage
+.cache/
+pytest_cache/
+
+# Archivos de compilación o build
+build/
+dist/
