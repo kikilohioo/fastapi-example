@@ -10,6 +10,9 @@ Este repositorio esta pensado como una especie de plantilla/manual para utilizar
 - Gestion profesional de variables de entorno
 - Gestion profesional basica de Usuarios/Claves
 - Configuracion basica de CORS
+- Pasos para crear una distribucion de Ubunutu con wsl
+- Configuracion de la maquina Ubuntu montada con wsl para despliegue de la aplicacion
+- 
 
 ---
 # Paso a Paso
@@ -72,4 +75,21 @@ app.add_middleware(
     allow_headers=['*'],
 )
 ```
-30. 
+30. Ahora para continuar con el curso necesitaremos una maquina Ubuntu disponible y accesible desde nuestra maquina local con Windows. Para ello en este manual usaremos wsl, por lo que lo tenemos que tener instalado y operativo, una vez confirmado esto ejecutaremos ```wsl --install -d Ubuntu``` lo que nos creara una instancia de Ubuntu dentro de nuestra maquina de Windows. Luego de completar el proceso ejecutaremos ```wsl --list``` y dara un resultado similar a:
+```
+Windows Subsystem for Linux Distributions:
+Ubuntu (Default)
+```
+Como podemos ver tenemos por defecto en mi caso Ubuntu, entonces al ejecutar ```wsl``` se iniciara una sesion dentro de esta distibucion. Tambien para no extender demasiado esto, se recomienda instalar y configurar adecuadamente ssh para mejorar la experiencia de desarrollo/despliegue en la maquin Ubuntu.
+31. Ahora tendremos que asegurarnos de tener python instalado con ```python3 --version``` y ademas deberemos de instalar si no lo tenemos aun pip3 con ```sudo apt install python3-pip -y```
+32. Luego instalaremos ```sudo apt install python3.12-venv -y``` para crear los virtual environments. Adicionalmente para solventar otros errores encontrados mas adelante instalaremos lo siguiente ```sudo apt install -y libpq-dev python3-dev build-essential```
+33. Tambien deberemos de tener una db de PostgreSQL lista para el entorno de produccion, idealmente instalada en esta maquin de Ubuntu, como este proceso es muy largo, lo agregaremos como requerimiento.
+34. Con un usario sudo, pero no root por ejemplo "mynewuser" crearemos un directorio en nuestra maquina virtual, para alamacenar la aplicacion de FastAPI por ejemplo ```mkdir app```
+35. Luego ```cd app``` y ahi crearemos un venv con ```python3 -m venv venv```
+36. Luego crearemos una carpeta llamada src con ```mkdir src``` donde clonaremos nuestra aplicacion con git, hacemos ```cd src```
+37. Clonamos con ```git clone <repo_clone_url> .```
+38. Una vez clonado volvemos hacia atras con ```cd ..``` activamos el venv con ```source venv/bin/activate```
+39. Volvemos a ```cd src``` y ejecutamos ```pip install -r requirements.txt``` para instalar todas las dependencias necesarias, quizas esto no funcione a la primera, actualmente lo hizo con los ajustes del paso 32. Y luego de eso desactivaremos el venv haciendo ```cd ..``` y luego ```deactivate```. Porque no lo necesitamos para los pasos inmediatos.
+40. Ahora tendremos que configurar nuestras variables de entorno, las mismas que en desarrollo se resolvian con el archivo .env directamente en la raiz del proyecto, ahora vamos a hacer algo un poco diferente. Crearemos un archivo .env en /home/<mynewuser> con ```cd ~``` luego ```sudo vi .env``` y ahi copiaremos todas las variables de nuestro .env actual ajustando los valores para que tengan sentido con produccion. Guardamos ese archivo.
+41. Luego editaremos el siguiente archivo ```sudo vi .profile``` y al final agregaremos lo siguiente ```set -o allexport; source /home/<mynewuser>/.env; set +o allexport```, que hara que persistan las variables de entorno incluso si se reinicia la maquina de Ubuntu.
+42. En la nueva aplicacion de produccion y su base de datos no tendremos las tablas creadas, por lo que usaremos Alembic, la herramienta que configuramos varios pasos atras. Para eso activaremos el venv estando en /home/<mynewuser>/app/ ```source venv/bin/activate``` nos moveremos a src con ```cd src``` y ejecutaremos el comando ```alembic upgrade head```
