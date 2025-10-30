@@ -12,7 +12,10 @@ Este repositorio esta pensado como una especie de plantilla/manual para utilizar
 - Configuracion basica de CORS
 - Pasos para crear una distribucion de Ubunutu con wsl
 - Configuracion de la maquina Ubuntu montada con wsl para despliegue de la aplicacion
-- 
+- Creacion de service con gunicorn para mejor gestion de la aplicacion corriendo
+- Creacion de un proxy con NGINX para mejorar la gestion de ssl terminations
+- Configuracion basica de seguridad con ufw para restringir trafico mediante el firewall de Ubuntu
+- Comming soon
 
 ---
 # Paso a Paso
@@ -92,4 +95,95 @@ Como podemos ver tenemos por defecto en mi caso Ubuntu, entonces al ejecutar ```
 39. Volvemos a ```cd src``` y ejecutamos ```pip install -r requirements.txt``` para instalar todas las dependencias necesarias, quizas esto no funcione a la primera, actualmente lo hizo con los ajustes del paso 32. Y luego de eso desactivaremos el venv haciendo ```cd ..``` y luego ```deactivate```. Porque no lo necesitamos para los pasos inmediatos.
 40. Ahora tendremos que configurar nuestras variables de entorno, las mismas que en desarrollo se resolvian con el archivo .env directamente en la raiz del proyecto, ahora vamos a hacer algo un poco diferente. Crearemos un archivo .env en /home/<mynewuser> con ```cd ~``` luego ```sudo vi .env``` y ahi copiaremos todas las variables de nuestro .env actual ajustando los valores para que tengan sentido con produccion. Guardamos ese archivo.
 41. Luego editaremos el siguiente archivo ```sudo vi .profile``` y al final agregaremos lo siguiente ```set -o allexport; source /home/<mynewuser>/.env; set +o allexport```, que hara que persistan las variables de entorno incluso si se reinicia la maquina de Ubuntu.
-42. En la nueva aplicacion de produccion y su base de datos no tendremos las tablas creadas, por lo que usaremos Alembic, la herramienta que configuramos varios pasos atras. Para eso activaremos el venv estando en /home/<mynewuser>/app/ ```source venv/bin/activate``` nos moveremos a src con ```cd src``` y ejecutaremos el comando ```alembic upgrade head```
+42. En la nueva base de datos de produccion no tendremos las tablas creadas, por lo que usaremos Alembic, la herramienta que configuramos varios pasos atras. Para eso activaremos el venv estando en /home/<mynewuser>/app/ ```source venv/bin/activate``` nos moveremos a src con ```cd src``` y ejecutaremos el comando ```alembic upgrade head```
+43. Ahora para el despliegue y la configuracion de persistencia de la aplicacion deberemos de instalar 2 nuevos paquetes con el siguiente comando ```pip install gunicorn uvloop```
+44. Luego para probar que funcione correctamente ejecutaremos manualmente el siguiente comando ```gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:<port>```, con esto la api deberia de poder ser consumida con http://<ip_ubuntu_machine>:<port>/
+45. Ahora vamos a crear un servicio en la maquina Ubuntu, copiando el que podemos encontrar en la raiz de este proyecto(gunicorn.service) y ajustando lo necesario para la implementacion que se esté haciendo. Para eso vamos a ```cd /etc/systemd/system/``` y ejecutamos ```vi <new_service_name>.service```, pegamos el contenido, lo ajustamos y listo, ya podemos ejecutar algo como ```sudo systemctl start newservicename``` y ahi deberiamos de ver algo muy similar a esto si todo sale bien y ejecutamos ```systemctl status newservicename```:
+```
+● newservicename.service - demo fastapi application
+     Loaded: loaded (/etc/systemd/system/newservicename.service; disabled; preset: enabled)
+     Active: active (running) since Wed 2025-10-29 23:23:32 -03; 9s ago
+   Main PID: 607 (gunicorn)
+      Tasks: 9 (limit: 9313)
+     Memory: 274.5M (peak: 275.0M)
+        CPU: 4.702s
+     CGroup: /system.slice/newservicename.service
+             ├─607 /home/fastapi/app/venv/bin/python3 /home/fastapi/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.Uvico>
+             ├─608 /home/fastapi/app/venv/bin/python3 /home/fastapi/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.Uvico>
+             ├─609 /home/fastapi/app/venv/bin/python3 /home/fastapi/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.Uvico>
+             ├─610 /home/fastapi/app/venv/bin/python3 /home/fastapi/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.Uvico>
+             └─611 /home/fastapi/app/venv/bin/python3 /home/fastapi/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.Uvico>
+
+Oct 29 23:23:33 kiki-pc gunicorn[609]: [2025-10-29 23:23:33 -0300] [609] [INFO] Started server process [609]
+Oct 29 23:23:33 kiki-pc gunicorn[609]: [2025-10-29 23:23:33 -0300] [609] [INFO] Waiting for application startup.
+Oct 29 23:23:33 kiki-pc gunicorn[610]: [2025-10-29 23:23:33 -0300] [610] [INFO] Application startup complete.
+Oct 29 23:23:33 kiki-pc gunicorn[608]: [2025-10-29 23:23:33 -0300] [608] [INFO] Started server process [608]
+Oct 29 23:23:33 kiki-pc gunicorn[608]: [2025-10-29 23:23:33 -0300] [608] [INFO] Waiting for application startup.
+Oct 29 23:23:33 kiki-pc gunicorn[611]: [2025-10-29 23:23:33 -0300] [611] [INFO] Started server process [611]
+Oct 29 23:23:33 kiki-pc gunicorn[611]: [2025-10-29 23:23:33 -0300] [611] [INFO] Waiting for application startup.
+Oct 29 23:23:33 kiki-pc gunicorn[609]: [2025-10-29 23:23:33 -0300] [609] [INFO] Application startup complete.
+Oct 29 23:23:33 kiki-pc gunicorn[608]: [2025-10-29 23:23:33 -0300] [608] [INFO] Application startup complete.
+Oct 29 23:23:33 kiki-pc gunicorn[611]: [2025-10-29 23:23:33 -0300] [611] [INFO] Application startup complete.
+``` 
+de lo contrario debemos revisar que sucede y corregirlo
+46. Por ultimo en este sentido ejecutaremos esto ```sudo systemctl enable newservicename``` para hacer que se reinicie automaticamente si se cae o se reinicia la maquina
+47. Para mejorar la gestion de las ssl terminatios y las solicutdes https como seria en un ambiente de produccion configuraremos NGINX, primero lo vamos a instalar con el siguiente comando ```sudo apt install nginx -y```
+48. Luego editaremos este archivo ```sudo vi /etc/nginx/sites-available/default``` y cambiaremos lo location por esto:
+```
+location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-NginX-Proxy true;
+        proxy_redirect off;
+}
+```
+49. Luego reiniciamos NGINX con ```sudo systemtl restart nginx``` y ahora apuntando a nuestra ip sin puerto o sea el por defecto :80, responde nuestra api.
+50. Para mayor seguridad se recomienda tener un dns, certificados y toda lo necesario para configurar NGINX de una forma similar a esta:
+```
+# Redirección HTTP → HTTPS
+server {
+    listen 80;
+    server_name midominio.local;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS con proxy hacia FastAPI
+server {
+    listen 443 ssl http2;
+    server_name midominio.local;
+
+    ssl_certificate     /etc/ssl/localcerts/midominio.local.crt;
+    ssl_certificate_key /etc/ssl/localcerts/midominio.local.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+51. (No funcionara en WSL2 Ubuntu)Lo siguiente que vamos a hacer es activar el firewall y restringir lo mas posible como medida de seguriad la disponibilidad de los puertos de la maquina Ubuntu, para esto ejecutaremos estos comandos:
+```
+sudo ufw allow http
+sudo ufw allow https
+sudo ufw allow ssh  
+sudo ufw allow 5432 # para conectarse desde pgadmin (no recomendado para produccion)
+```
+52. Comming soon

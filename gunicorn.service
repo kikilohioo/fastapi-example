@@ -1,0 +1,18 @@
+# Steps:
+# 1. Read all the comments below and try to understand it
+# 2. Then remove all of them
+
+[Unit]
+Description=demo fastapi application        # description of the current service
+After=network.target                        # after what this service can be started
+
+[Service]
+User=fastapi                                    # user that is used to run this service
+Group=fastapi                                   # the same of the user or an specific group that you should to know why you specify here
+WorkingDirectory=/home/fastapi/app/src/         # where is your proyect source located
+Environment="PATH=/home/fastapi/app/venv/bin"   # where is your proyect venv python.exe located
+EnvironmentFile=/home/fastapi/.env              # .env file full path
+ExecStart=/home/fastapi/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000    # the real command that is runned an supervised by this service
+
+[Install]
+WantedBy=multi-user.target                      # a default config needed to work properly
