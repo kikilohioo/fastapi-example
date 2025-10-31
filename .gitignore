@@ -28,3 +28,6 @@ pytest_cache/
 # Archivos de compilación o build
 build/
 dist/
+
+# Docker
+docker-compose-dev.yml

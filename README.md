@@ -2,6 +2,9 @@
 #### Nota:
 El proyecto fue construido en base a una maquina Windows, por lo que pueden haber diferencias cuando se quiera integrar en MacOS o Linux
 
+#### Material de referencia: https://youtu.be/0sOvCWFmrtA?si=CsVjzb1tTSYWsJh8
+Este es el video en el que me base para realizar este proyecto, ademas agregue algunas cosas y modifique otras segun mis preferencias. Pero es un material increible sin duda.
+
 ### Resumen:
 Este repositorio esta pensado como una especie de plantilla/manual para utilizar como base para nuevos proyectos basados en FastAPI. Incluye algunas cosas importantes como:
 - Integracion con modelos de SQLAlchemy, asi como las operaciones CRUD y algunas consultas mas complejas de ejemplos
@@ -15,7 +18,9 @@ Este repositorio esta pensado como una especie de plantilla/manual para utilizar
 - Creacion de service con gunicorn para mejor gestion de la aplicacion corriendo
 - Creacion de un proxy con NGINX para mejorar la gestion de ssl terminations
 - Configuracion basica de seguridad con ufw para restringir trafico mediante el firewall de Ubuntu
-- Comming soon
+- Creacion y configuracion de una imagen de Docker para containerizar la aplicacion de FastAPI
+- Configuracion de Docker Compose para ejecutar de forma mas sencilla y segura nuestra imagen de Docker y un contenedor para nuestra base de datos PostgreSQL
+- 
 
 ---
 # Paso a Paso
@@ -186,4 +191,11 @@ sudo ufw allow https
 sudo ufw allow ssh  
 sudo ufw allow 5432 # para conectarse desde pgadmin (no recomendado para produccion)
 ```
-52. Comming soon
+52. Lo siguiente sera usar una imagen de docker para nuestro proyecto, para eso tenemos en la raiz del mismo un archivo `Dockerfile` con todo lo necesario para levantar esta imagen en cualquier maquina con Docker instalado correctamente y tenemos tambien un `docker-compose-dev.example.yml` que utiliza esa imagen. Lo ajustamos segun nuestras necesidades, lo renombramos como `docker-compose-dev.yml` y con este comando ```docker-compose -f docker-compose-dev.yml up --build```. Se levantaran 2 cosas 1 contenedor de la base de datos PostgreSQL, al finalizar se levantara el contenedor de nustra aplicacion FastAPI y por ultimo se ejecutara este archivo `db_init.sh` que tambien esta en la raiz de nuestro proyecto, en el contenedor de la aplicacion para levantar la estructura de la base de datos mediante Alembic.
+- Comando para listar todos los contenedores:
+    ```docker ps```
+- Comando para listar todas las imagenes:
+    ```docker image ls```
+- Tenemos este comando muy interesante para poder acceder a una terminal bash dentro del contenedor de nuestra aplicacion:
+    ```docker exec -it <container_name> bash```
+53. 
