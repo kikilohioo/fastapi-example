@@ -263,6 +263,10 @@ jobs:
       run: python -m pip install --upgrade pip
     - name: Install all the dependencies
       run: pip install -r requirements.txt
+    - name: Run all test with Pytest
+      run: |
+        pip install pytest
+        pytest -s -v
 ```
 62. Luego para ver el estado y el proceso de nuestro workflow podemos ir a la seccion Actions de nuestro repositorio en Github y revisar todo lo que creamos conveniente
 63. Por otro lado existe un Github Marketplace para usar actions comunes para no ejecutar comandos muy inespecificos, por ejemplo en el caso de instalar python podriamos hacer:
