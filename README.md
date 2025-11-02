@@ -253,4 +253,22 @@ jobs:
       run: echo '🚀 Initialazing CI/CD pipeline workflow to sync FastAPI application changes'
     - name: Pulling git repository
       uses: actions/checkout@v2 
+    # aca en lugar de run a command usamos un action desde el marketplace
+    # luego actualizamos pip e instalamos las dependencias
+    - name: Install python version 3.12
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+    - name: Install all the dependencies
+      run: pip install -r requirements.txt
 ```
+62. Luego para ver el estado y el proceso de nuestro workflow podemos ir a la seccion Actions de nuestro repositorio en Github y revisar todo lo que creamos conveniente
+63. Por otro lado existe un Github Marketplace para usar actions comunes para no ejecutar comandos muy inespecificos, por ejemplo en el caso de instalar python podriamos hacer:
+```
+- name: Install python
+  run: sudo apt install python ...
+```
+Pero existe un action para hacer uso de el llamado setup-python que realiza varias cosas mas para que no se rompa o pase aun mas casos de uso que solo ejecutar el comando
+64. 
