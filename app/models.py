@@ -10,7 +10,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
-    published = Column(Boolean, server_default=expression.true(), nullable=False)
+    published = Column(Boolean, default=True, server_default=expression.true(), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User')
     

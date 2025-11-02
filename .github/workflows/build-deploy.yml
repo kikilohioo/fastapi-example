@@ -1,0 +1,18 @@
+name: Build and Deploy code
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Init workflow
+        run: echo '🚀 Initialazing CI/CD pipeline workflow to sync FastAPI application changes'
+      - name: Pulling git repository
+        uses: actions/checkout@v2 

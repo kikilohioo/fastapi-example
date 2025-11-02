@@ -20,10 +20,17 @@ Este repositorio esta pensado como una especie de plantilla/manual para utilizar
 - Configuracion basica de seguridad con ufw para restringir trafico mediante el firewall de Ubuntu
 - Creacion y configuracion de una imagen de Docker para containerizar la aplicacion de FastAPI
 - Configuracion de Docker Compose para ejecutar de forma mas sencilla y segura nuestra imagen de Docker y un contenedor para nuestra base de datos PostgreSQL
-- 
+- Repasamos basicamente el uso de PYTest para testing y creamos algunos tests
+- Creamos y configuramos un pipeline de CI/CD con Github Actions
+
+### Proximos pasos:
+La idea de este repositorio es seguir mejorandolo para tener una buena base sobre la cual trabajar, por lo que se proponen los siguientes puntos en los que seguir trabajando para mejorarlo:
+- Seguir avanzando en mejorar el sistema de Testing
+- Mejorar la estructura en general del proyecto para mantenerlo apegado a las mejores praticas
+- Investigar e implementar los cambios necesarios para usar SQLModel, una libreria mas moderna que por lo que entiendo perfecciona el potencial de SQLAlchemy y Pydantic en una sola libreria
 
 ---
-# Paso a Paso
+# Paso a Paso, Tips y Mas
 
 1. Asgurarse de tener la version de python necesaria
 2. Crear una carpeta para el nuevo proyecto
@@ -198,4 +205,52 @@ sudo ufw allow 5432 # para conectarse desde pgadmin (no recomendado para producc
     ```docker image ls```
 - Tenemos este comando muy interesante para poder acceder a una terminal bash dentro del contenedor de nuestra aplicacion:
     ```docker exec -it <container_name> bash```
-53. 
+53. Con nuestro Virtual Environment activado vamos a pasar a otro tema que es TESTING. Para eso instalamos lo siguiente ```pip install pytest``` y ejecutamos ```pytest``` o ```pytest -v``` para ver si quedo todo ok, en caso de que si, retorna algo como esto:
+```
+===================================================================== test session starts =====================================================================
+platform win32 -- Python 3.14.0, pytest-8.4.2, pluggy-1.6.0
+rootdir: C:\Users\kikim\OneDrive\Documentos\Projects\tests\python\FastAPI
+collected 0 items                                                                                                                                               
+
+==================================================================== no tests ran in 0.03s ====================================================================
+```
+54. Los tests siempre deben llamarse asi: `something_test.py` | `test_something.py` y las funciones para ejecutar los tests deben comenzar con `test`, por cuestiones de convencion y conveniencia usaremos `test_somenthing` tanto para los archivos como para las funciones.
+55. Dentro de la carpeta ./test podremos encontrar todo lo referido a testing de este proyecto, pero iremos comentando algunas cosas importantes en los puntos siguientes.
+56. FastAPI tiene una herramienta llamada TestClient que usaremos para el proceso de hacer testing en nuestra app de una forma mas core y mejor integrada a la estructura de nuestra API.
+57. Vamos a crear un archivo para tener una instancia de la base de datos, dentro de la carpeta `./tests/conftest.py`, ya lo podran encontrar ahi configurado, pero en escencia sirve para poder tener una base de datos no productiva a la cual afectar con los tests, generar datos basicos como una sesion reutilizable para metodos que lo requieran y alguna cosa mas. Este archivo `conftest.py` es un archivo especial de pytest.
+58. Tip importante cuando llamemos por ejemplo a rutas para cargar listas de cosas como `/users`, tenemos que hacer la solicitud a `/users/` sino FastAPI hara una 307 redirect de `/users` -> `/users/` y eso rompe varios tests.
+59. Hay un tema muy interesante para seguir mejorando que son los `@pytest.fixture(scope='<scopes>')` estos scopes son muy interesantes, ya que permiten declarar funciones fixture de diferentes 'niveles', en este caso solo modifique el scope de la db_session para crearla al inicio de todos los test y destruirla al final, pero se pueden hacer mas cosas interesantes
+60. El siguiente paso de este repositorio es crear un pipelinde de CI/CD con Github Actions, para eso vamos a crear una carpeta llamada `.github` con otra carpeta adentro `workflows` y dentro colocaremos nuestro workflow de deploy `build-deploy.yml`
+61. En este archivo tendremos que especificar muchas cosas pero aqui dejare una breve explicacion de cada punto incluido en el archivo que ecnontraran en el repo:
+```
+# nombre del workflow
+name: Build and Deploy code 
+
+# trigger actions para ejecutar este worflow en este caso push y pull_request
+# solo para la rama master, pero pueden ser otros triggers como merge, etc, 
+# y en diferentes ramas como main, test_a, test_b, etc
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+
+# aqui en los jobs se definene las tareas que se van a ir
+# ejecutando y en cada job definiremos con que maquina vamos a
+# ejecutar este job, en este caso ubuntu-latest, pero puede ser windows-xversion, centos, etc
+#
+# luego tenemos para cada job, su serie de steps, que son los comandos/actions que se van a ejecutar
+# cada step tiene que ir con un nombre humanamente legible y luego el comando/action en si
+# asi como tambien se pueden agregar prints para tener feedback del proceso del workflow
+# y tambien para cada uses, podemos pasar un with, para enviar configuraciones especificas para cada action o command
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+  steps:
+    - name: Init workflow
+      run: echo '🚀 Initialazing CI/CD pipeline workflow to sync FastAPI application changes'
+    - name: Pulling git repository
+      uses: actions/checkout@v2 
+```
