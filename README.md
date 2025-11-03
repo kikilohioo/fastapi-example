@@ -248,25 +248,56 @@ on:
 jobs:
   job1:
     runs-on: ubuntu-latest
-  steps:
-    - name: Init workflow
-      run: echo '🚀 Initialazing CI/CD pipeline workflow to sync FastAPI application changes'
-    - name: Pulling git repository
-      uses: actions/checkout@v2 
-    # aca en lugar de run a command usamos un action desde el marketplace
-    # luego actualizamos pip e instalamos las dependencias
-    - name: Install python version 3.12
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.12'
-    - name: Update pip
-      run: python -m pip install --upgrade pip
-    - name: Install all the dependencies
-      run: pip install -r requirements.txt
-    - name: Run all test with Pytest
-      run: |
-        pip install pytest
-        pytest -s -v
+    environment:
+      name: testing
+    env:
+      DATABASE_HOSTNAME: ${{secrets.DATABASE_HOSTNAME}}
+      DATABASE_PORT: ${{secrets.DATABASE_PORT}}
+      DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+      DATABASE_NAME: ${{secrets.DATABASE_NAME}}
+      DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
+      SECRET_KEY: ${{secrets.SECRET_KEY}}
+      ALGORITHM: ${{secrets.ALGORITHM}}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
+    # aqui van servicios que necesitamos segun el caso en el nuestro es solo postgresql
+    services:
+      # etiqueta del servicio a utilizar database en nuestro caso
+      database:
+        # imagen de Docker Hub
+        image: postgres
+        # dar la contraseña de postgres necesaria
+        env:
+          POSTGRES_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+          POSTGRES_DB: ${{secrets.DATABASE_NAME}}_test # nombre de base de datos para tests 
+        # set los puertos para hacer proxy entre service y red accesible para nuestra app
+        # esto tiene que ser harcoded porque sino falla
+        ports:
+          - 5432:5432
+        # set health checks para esperar que postgresql este listo
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+        - name: Init workflow
+        run: echo '🚀 Initialazing CI/CD pipeline workflow to sync FastAPI application changes'
+        - name: Pulling git repository
+        uses: actions/checkout@v2 
+        # aca en lugar de run a command usamos un action desde el marketplace
+        # luego actualizamos pip e instalamos las dependencias
+        - name: Install python version 3.12
+        uses: actions/setup-python@v2
+        with:
+            python-version: '3.12'
+        - name: Update pip
+        run: python -m pip install --upgrade pip
+        - name: Install all the dependencies
+        run: pip install -r requirements.txt
+        - name: Run all test with Pytest
+        run: |
+            pip install pytest
+            pytest -s -v
 ```
 62. Luego para ver el estado y el proceso de nuestro workflow podemos ir a la seccion Actions de nuestro repositorio en Github y revisar todo lo que creamos conveniente
 63. Por otro lado existe un Github Marketplace para usar actions comunes para no ejecutar comandos muy inespecificos, por ejemplo en el caso de instalar python podriamos hacer:
@@ -275,4 +306,4 @@ jobs:
   run: sudo apt install python ...
 ```
 Pero existe un action para hacer uso de el llamado setup-python que realiza varias cosas mas para que no se rompa o pase aun mas casos de uso que solo ejecutar el comando
-64. 
+64. Lo siguiente es crear Environment Secrets en nuestro repositorio de Github y los llamaremos en nuestra seccion de environment: para usar el environment creado en Github y env: para setear los secrets correspondientes asi: `VARIABEL_NAME: ${{secrets.VARIABEL_NAME}}` en nuestro workflow.
