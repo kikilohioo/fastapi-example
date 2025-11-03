@@ -307,3 +307,47 @@ jobs:
 ```
 Pero existe un action para hacer uso de el llamado setup-python que realiza varias cosas mas para que no se rompa o pase aun mas casos de uso que solo ejecutar el comando
 64. Lo siguiente es crear Environment Secrets en nuestro repositorio de Github y los llamaremos en nuestra seccion de environment: para usar el environment creado en Github y env: para setear los secrets correspondientes asi: `VARIABEL_NAME: ${{secrets.VARIABEL_NAME}}` en nuestro workflow.
+65. Ahora toca configurar un service para levantar una test db para ejecutar los tests y para eso agregaremos esta seccion a nuestro worflow .yml
+```
+services:
+  database:
+  image: postgres
+  env:
+    POSTGRES_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+    POSTGRES_DB: ${{secrets.DATABASE_NAME}}_test
+  ports:
+    - 5432:5432
+  options: >-
+    --health-cmd pg_isready
+    --health-interval 10s
+    --health-timeout 5s
+    --health-retries 5
+```
+66. El siguiente paso es configurar nuestro repo de Docker Hub y nuestro pipeline de CI/CD para que uno de los jobs sea crear una nueva version de esa imagen Docker que sea facilmente replicable en los diferentes ambientes
+67. Para eso vamos a crear un Personal Access Token en Docker Hub, que hoy 3/11/2025 se hace yendo a Account Settings -> Settings -> Personal Access Token y creando uno nuevo con un paso a paso muy sencillo, lo guardaremos para incluir luego en nuestros secrets.
+68. Crearemos dos nuevos environment secrets que seran el docker hub username y password
+69. Ahora agregamos esta seccion a nuestro workflow .yml para iniciar sesion en nuestro docker hub
+```
+- name: Login to Docker Hub
+uses: docker/login-action@v3
+with:
+username: ${{ secrets.DOCKER_HUB_USERNAME }}
+password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+- name: Set up QEMU
+  uses: docker/setup-qemu-action@v3
+- name: Set up Docker Buildx
+  uses: docker/setup-buildx-action@v3
+- name: Build and push
+  uses: docker/build-push-action@v6
+with:
+  context: ./
+  file: ./DockerFile
+  push: true
+  tags: ${{secrets.DOCKER_HUB_USERNAME}}/<docker_hub_repo_name>:latest
+  cache-from: type=local,src=/tmp/.buildx-cache
+  cache-to: type=local,dest=/tmp/.buildx-cache
+- name: Image digest
+  run: echo ${{steps.docker_build.outputs.digest}}
+```
+70. 
