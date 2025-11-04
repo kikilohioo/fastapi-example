@@ -22,13 +22,14 @@ Este repositorio esta pensado como una especie de plantilla/manual para utilizar
 - Configuracion de Docker Compose para ejecutar de forma mas sencilla y segura nuestra imagen de Docker y un contenedor para nuestra base de datos PostgreSQL
 - Repasamos basicamente el uso de PYTest para testing y creamos algunos tests
 - Creamos y configuramos un pipeline de CI/CD con Github Actions simplificado en: run all tests -> build and push -> deploy
-- 
+- Falta terminar de probar el pipeline por falta de VPS con ip publica para hacer deploy con ssh
 
 ### Proximos pasos:
 La idea de este repositorio es seguir mejorandolo para tener una buena base sobre la cual trabajar, por lo que se proponen los siguientes puntos en los que seguir trabajando para mejorarlo:
 - Seguir avanzando en mejorar el sistema de Testing
 - Mejorar la estructura en general del proyecto para mantenerlo apegado a las mejores praticas
 - Investigar e implementar los cambios necesarios para usar SQLModel, una libreria mas moderna que por lo que entiendo perfecciona el potencial de SQLAlchemy y Pydantic en una sola libreria
+- Terminar de probar el pipeline con un VPS con ip publica para hacer deploy con ssh built-in github action
 
 ---
 # Paso a Paso, Tips y Mas
@@ -352,4 +353,4 @@ with:
   run: echo ${{steps.docker_build.outputs.digest}}
 ```
 70. Luego lo separamos en 3 jobs uno para tests, otro para build y push a docker hub si pasan los tests y un ultimo si pasa build and push para hacer deploy al server final
-71. 
+71. Actualmente no tengo los medios para probar el ultimo paso asi que esta sujeto a modificaciones cuando tenga un vps con ip publica para poder conectarme por ssh y ejecutar el ultimo paso
