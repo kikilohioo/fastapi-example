@@ -350,4 +350,4 @@ with:
 - name: Image digest
   run: echo ${{steps.docker_build.outputs.digest}}
 ```
-70. 
+70. Luego lo separamos en 2 jobs uno para tests y otro para build y push a docker hub si pasan los tests
