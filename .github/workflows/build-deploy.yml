@@ -93,15 +93,15 @@ jobs:
       - name: Image digest
         run: echo ${{steps.docker_build.outputs.digest}}
 
-    deploy:
-      name: Deploy to Test Server
-      runs-on: ubuntu-latest
-      needs: 
-        - tests
-        - build-and-push
+  deploy:
+    name: Deploy to Test Server
+    runs-on: ubuntu-latest
+    needs: 
+      - tests
+      - build-and-push
 
-      environment:
-        name: testing
+    environment:
+      name: testing
 
     steps:
       - name: Deploy via SSH
