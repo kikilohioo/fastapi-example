@@ -21,7 +21,8 @@ Este repositorio esta pensado como una especie de plantilla/manual para utilizar
 - Creacion y configuracion de una imagen de Docker para containerizar la aplicacion de FastAPI
 - Configuracion de Docker Compose para ejecutar de forma mas sencilla y segura nuestra imagen de Docker y un contenedor para nuestra base de datos PostgreSQL
 - Repasamos basicamente el uso de PYTest para testing y creamos algunos tests
-- Creamos y configuramos un pipeline de CI/CD con Github Actions
+- Creamos y configuramos un pipeline de CI/CD con Github Actions simplificado en: run all tests -> build and push -> deploy
+- 
 
 ### Proximos pasos:
 La idea de este repositorio es seguir mejorandolo para tener una buena base sobre la cual trabajar, por lo que se proponen los siguientes puntos en los que seguir trabajando para mejorarlo:
@@ -350,4 +351,5 @@ with:
 - name: Image digest
   run: echo ${{steps.docker_build.outputs.digest}}
 ```
-70. Luego lo separamos en 2 jobs uno para tests y otro para build y push a docker hub si pasan los tests
+70. Luego lo separamos en 3 jobs uno para tests, otro para build y push a docker hub si pasan los tests y un ultimo si pasa build and push para hacer deploy al server final
+71. 
