@@ -103,28 +103,28 @@ jobs:
       environment:
         name: testing
 
-      steps:
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USERNAME }}
-        password: ${{ secrets.DEPLOY_PASSWORD }}
-        port: ${{ secrets.DEPLOY_PORT }}
-        script: |
-          cd app/src/
-          
-          echo "Pulling latest image..."
-          docker pull vieracaiqui/fastapi-example:latest
-          
-          echo "Stopping old containers..."
-          docker compose -f docker-compose-prod.yml down
-          
-          echo "Starting services..."
-          docker compose -f docker-compose-prod.yml up -d
-          
-          echo "Pruning old images..."
-          docker image prune -f
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            cd app/src/
+            
+            echo "Pulling latest image..."
+            docker pull vieracaiqui/fastapi-example:latest
+            
+            echo "Stopping old containers..."
+            docker compose -f docker-compose-prod.yml down
+            
+            echo "Starting services..."
+            docker compose -f docker-compose-prod.yml up -d
+            
+            echo "Pruning old images..."
+            docker image prune -f
         
 
 
