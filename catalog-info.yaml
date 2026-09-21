@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fastapi-example
+  title: FastAPI Example
+  description: Plantilla/manual de API con FastAPI, SQLAlchemy, Alembic, OAuth2 con JWT, Docker y CI/CD con GitHub Actions.
+  annotations:
+    github.com/project-slug: kikilohioo/fastapi-example
+  tags:
+    - python
+    - fastapi
+    - postgresql
+    - docker
+    - example
+  links:
+    - url: https://github.com/kikilohioo/fastapi-example
+      title: Repositorio en GitHub
+      icon: github
+spec:
+  type: service
+  lifecycle: experimental
+  owner: guests
